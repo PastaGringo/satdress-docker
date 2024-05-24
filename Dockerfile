@@ -7,7 +7,7 @@ RUN go build
 RUN go build ./cli/satdress-cli.go
 
 FROM alpine:3.14
-# COPY --from=builder /opt/buid/satdress /usr/local/bin/
+RUN apk add curl jq
 COPY --from=builder /opt/buid/ /usr/local/bin/
 EXPOSE 8080
 COPY entrypoint.sh /
