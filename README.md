@@ -21,7 +21,6 @@ services:
       - SITE_OWNER_NAME=pastagringo
       - SITE_OWNER_URL=https://satdress.plebes.ovh
       - SITE_NAME=Fractalized
-      - NOSTRPRIVATEKEYHEX=19b598e0d3f738ac75c2fc1a33cd758abdf8f3bc53e4a7210dcfb31581a5321a
       - USER=pastagringo
       - PHOENIXD_HOST=phoenixbits
       - PHOENIXD_PORT=9740
