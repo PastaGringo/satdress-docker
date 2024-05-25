@@ -21,7 +21,7 @@ echo "╰───────────────────────�
 echo
 echo "FORCE_RECONFIG    : $FORCE_RECONFIG"
 echo "HOST              : $HOST"
-echo "NOSTRPRIVATEKEY   : $NOSTRPRIVATEKEY"
+echo "NOSTRPRIVATEKEYHEX: $NOSTRPRIVATEKEYHEX"
 echo "PORT              : $PORT"
 echo "DOMAIN            : $DOMAIN"
 echo "SITE_OWNER_URL    : $SITE_OWNER_URL"
@@ -32,6 +32,7 @@ echo "PHOENIXD_PORT     : $PHOENIXD_PORT"
 echo "PHOENIXD_KEY      : $PHOENIXD_KEY"
 echo "USER              : $USER"
 echo "NWC_RELAY         : $NWC_RELAY"
+echo "NWC_ENABLE        : $NWC_ENABLE"
 echo
 echo "╭────────────────────────╮"
 echo "│ Testing Phoenixd... ⤵️  │"
@@ -66,7 +67,6 @@ else
     echo
     echo "CTRL+C to exit the container"
     echo
-    # Rester en cours d'exécution pour que le conteneur Docker ne s'arrête pas
     while :; do
         sleep 3600
     done
@@ -82,9 +82,16 @@ echo
 if [ -f "docker_setup_done" ] && [ "$FORCE_RECONFIG" != "true" ]; then
     echo ">>> Satdress has already been configured. Nothing to configure."
     echo
-    echo "╭────────────────────────────────╮"
-    echo "│ ⚡ Starting Satdress...  🚀 ⤵️  │"
-    echo "╰────────────────────────────────╯"
+    echo "╭────────────────────────────────────╮"
+    echo "│ Showing NWC string & QR code... ⤵️  │"
+    echo "╰────────────────────────────────────╯"
+    echo
+    nwc_string=$(cat nwc.string)
+    echo $nwc_string
+    echo
+    echo "╭───────────────────────────────╮"
+    echo "│ ⚡ Starting Satdress... 🚀 ⤵️ │"
+    echo "╰───────────────────────────────╯"
     echo
     /usr/local/bin/satdress
 else
@@ -94,47 +101,56 @@ else
         echo ">>> Satdress is started for the first time! Configuring Satdress..."
     fi
     echo
-    echo "╭───────────────────────────╮"
-    echo "│ Generating NWC keys... ⤵️  │"
-    echo "╰───────────────────────────╯"
+    echo "╭───────────────────────╮"
+    echo "│ Generating keys... ⤵️  │"
+    echo "╰───────────────────────╯"
     echo
-    /usr/local/bin/satdress-cli nwc keygen >> nwc.keys
-    private_key=$(grep "private key:" "nwc.keys" | cut -d ' ' -f 3)
-    private_key_hex=$(grep "public key:" "nwc.keys" | cut -d ' ' -f 3)
+    /usr/local/bin/satdress-cli keygen >> nwc.keys
+    private_key=$(grep "private hex:" "nwc.keys" | cut -d ' ' -f 3)
+    private_key_hex=$(grep "public hex:" "nwc.keys" | cut -d ' ' -f 3)
     nsec=$(grep "nsec:" "nwc.keys" | cut -d ' ' -f 2)
     npub=$(grep "npub:" "nwc.keys" | cut -d ' ' -f 2)
     echo "Private key       : $private_key"
-    echo "Private key Hex   : $private_key_hex"
+    echo "Private key hex   : $private_key_hex"
     echo "Nsec              : $nsec"
     echo "Npub              : $npub"
+    echo
+    echo "╭─────────────────────────────────╮"
+    echo "│ Generating NWC secret key... ⤵️  │"
+    echo "╰─────────────────────────────────╯"
+    echo
+    /usr/local/bin/satdress-cli nwc create-secret >> nwc.secret
+    NWC_SECRET=$(grep "secret:" nwc.secret | awk '{print $2}')
+    echo "NWC secret key    : $NWC_SECRET"
     echo
     echo "╭────────────────────────────╮"
     echo "│ Configuring Satdress... ⤵️  │"
     echo "╰────────────────────────────╯"
     echo
-    echo "> Creating config.yml..."
+    echo -n "> Creating config.yml... "
     echo "host: $HOST" >> $path_config
     echo "port: $PORT" >> $path_config
     echo "domain: $DOMAIN" >> $path_config
     echo "siteownername: $SITE_OWNER_NAME" >> $path_config
     echo "siteownerurl: $SITE_OWNER_URL" >> $path_config
     echo "sitename: $SITE_NAME" >> $path_config
-    echo "nostrprivatekey: $NOSTRPRIVATEKEY" >> $path_config
-    echo ""  >> $path_config
+    echo "nostrprivatekey: $NOSTRPRIVATEKEYHEX" >> $path_config
+    echo "nwc: $NWC_ENABLE" >> $path_config
+    echo "" >> $path_config
     echo "users:" >> $path_config
     echo "  - name: $USER" >> $path_config
     echo "    kind: phoenix" >> $path_config
     echo "    host: $PHOENIXD_HOST:$PHOENIXD_PORT" >> $path_config
     echo "    key: $PHOENIXD_KEY" >> $path_config
-    echo "    nwcsecret: $private_key" >> $path_config
+    echo "    nwcsecret: $NWC_SECRET" >> $path_config
     echo "    nwcrelay: $NWC_RELAY" >> $path_config
     echo
-    echo ">>> Configuration is done ✅ "
+    echo ">>> done ✅ "
     touch docker_setup_done
     echo
-    echo "╭────────────────────────────────╮"
-    echo "│ ⚡ Starting Satdress...  🚀 ⤵️  │"
-    echo "╰────────────────────────────────╯"
+    echo "╭───────────────────────────────╮"
+    echo "│ ⚡ Starting Satdress... 🚀 ⤵️ │"
+    echo "╰───────────────────────────────╯"
     echo
     nohup /usr/local/bin/satdress > satdress.out &
     sleep 10
@@ -151,7 +167,7 @@ else
     echo
     /usr/local/bin/satdress-cli nwc connect-string --user $USER >> nwc.string
     nwc_string=$(cat nwc.string)
-    echo $nwc_string
+    echo "⏩ $nwc_string"
     echo
     id=$(echo $nwc_string | sed -n 's|nostr+walletconnect://\([^?]*\)?.*|\1|p')
     encoded_relay=$(echo $nwc_string | sed -n 's|.*relay=\([^&]*\)&.*|\1|p')
