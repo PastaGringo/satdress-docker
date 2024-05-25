@@ -21,12 +21,13 @@ services:
       - SITE_OWNER_NAME=pastagringo
       - SITE_OWNER_URL=https://satdress.plebes.ovh
       - SITE_NAME=Fractalized
-      - NOSTRPRIVATEKEY=19b598e0d3f738ac75c2fc1a33cd758abdf8f3bc53e4a7210dcfb31581a5321a # -> NSEC PRIVATE HEX: https://nostrtool.com
+      - NOSTRPRIVATEKEYHEX=19b598e0d3f738ac75c2fc1a33cd758abdf8f3bc53e4a7210dcfb31581a5321a
       - USER=pastagringo
       - PHOENIXD_HOST=phoenixbits
       - PHOENIXD_PORT=9740
       - PHOENIXD_KEY=1075d3c17d2625f518fc88b1a48e59464b0f7ad6cbaf7a233e0109804ff0eb66
       - NWC_RELAY=wss://nostr.fractalized.net
+      - NWC_ENABLE=true
     # ports:
     #   - 8080:8080
 
