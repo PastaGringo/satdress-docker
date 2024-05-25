@@ -21,7 +21,6 @@ echo "╰───────────────────────�
 echo
 echo "FORCE_RECONFIG    : $FORCE_RECONFIG"
 echo "HOST              : $HOST"
-echo "NOSTRPRIVATEKEYHEX: $NOSTRPRIVATEKEYHEX"
 echo "PORT              : $PORT"
 echo "DOMAIN            : $DOMAIN"
 echo "SITE_OWNER_URL    : $SITE_OWNER_URL"
@@ -107,11 +106,11 @@ else
     echo
     /usr/local/bin/satdress-cli keygen >> nwc.keys
     private_key=$(grep "private hex:" "nwc.keys" | cut -d ' ' -f 3)
-    private_key_hex=$(grep "public hex:" "nwc.keys" | cut -d ' ' -f 3)
+    PRIVATE_KEY_HEX=$(grep "public hex:" "nwc.keys" | cut -d ' ' -f 3)
     nsec=$(grep "nsec:" "nwc.keys" | cut -d ' ' -f 2)
     npub=$(grep "npub:" "nwc.keys" | cut -d ' ' -f 2)
     echo "Private key       : $private_key"
-    echo "Private key hex   : $private_key_hex"
+    echo "Private key hex   : $PRIVATE_KEY_HEX"
     echo "Nsec              : $nsec"
     echo "Npub              : $npub"
     echo
@@ -134,7 +133,7 @@ else
     echo "siteownername: $SITE_OWNER_NAME" >> $path_config
     echo "siteownerurl: $SITE_OWNER_URL" >> $path_config
     echo "sitename: $SITE_NAME" >> $path_config
-    echo "nostrprivatekey: $NOSTRPRIVATEKEYHEX" >> $path_config
+    echo "nostrprivatekey: $PRIVATE_KEY_HEX" >> $path_config
     echo "nwc: $NWC_ENABLE" >> $path_config
     echo "" >> $path_config
     echo "users:" >> $path_config
